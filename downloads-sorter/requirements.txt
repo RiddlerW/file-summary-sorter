@@ -1,0 +1,6 @@
+anthropic
+pdfplumber
+python-docx
+python-pptx
+openpyxl
+customtkinter
