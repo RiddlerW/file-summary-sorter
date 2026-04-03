@@ -211,7 +211,7 @@ class SorterApp:
         frame.pack(fill=ctk.X)
 
         api_row = ctk.CTkFrame(frame, fg_color="transparent")
-        api_row.pack(fill=ctk.X, pady=(0, 10))
+        api_row.pack(fill=ctk.X, pady=(0, 8))
 
         ctk.CTkLabel(api_row, text="API Key", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", width=100).pack(side=ctk.LEFT, padx=(0, 10))
         self.api_var = ctk.StringVar(value=self.api_key)
@@ -219,17 +219,42 @@ class SorterApp:
         self.api_entry.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
         ctk.CTkButton(api_row, text="显示", command=self._toggle_api, font=("Segoe UI", 15), corner_radius=10, width=70, height=40, fg_color="#FFFFFF", text_color="#0071E3", hover_color="#F0F0F2").pack(side=ctk.LEFT)
 
+        scan_row = ctk.CTkFrame(frame, fg_color="transparent")
+        scan_row.pack(fill=ctk.X, pady=(0, 8))
+
+        ctk.CTkLabel(scan_row, text="扫描文件夹", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", width=100).pack(side=ctk.LEFT, padx=(0, 10))
+        self.scan_folder_var = ctk.StringVar(value=str(DOWNLOADS_DIR))
+        ctk.CTkEntry(scan_row, textvariable=self.scan_folder_var, font=("Segoe UI", 17), corner_radius=10, height=40).pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
+        ctk.CTkButton(scan_row, text="浏览", command=self._browse_scan_folder, font=("Segoe UI", 15), corner_radius=10, width=70, height=40, fg_color="#FFFFFF", text_color="#0071E3", hover_color="#F0F0F2").pack(side=ctk.LEFT)
+
         folder_row = ctk.CTkFrame(frame, fg_color="transparent")
         folder_row.pack(fill=ctk.X)
 
-        ctk.CTkLabel(folder_row, text="保留文件夹", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", width=100).pack(side=ctk.LEFT, padx=(0, 10))
-        self.keep_folder_var = ctk.StringVar(value=str(DEFAULT_KEEP_DIR))
-        ctk.CTkEntry(folder_row, textvariable=self.keep_folder_var, font=("Segoe UI", 17), corner_radius=10, height=40).pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
-        ctk.CTkButton(folder_row, text="浏览", command=self._browse_keep_folder, font=("Segoe UI", 15), corner_radius=10, width=70, height=40, fg_color="#FFFFFF", text_color="#0071E3", hover_color="#F0F0F2").pack(side=ctk.LEFT)
+        left_folders = ctk.CTkFrame(folder_row, fg_color="transparent")
+        left_folders.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
+
+        ctk.CTkLabel(left_folders, text="保留文件夹", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", width=100).pack(side=ctk.LEFT, padx=(0, 10))
+        self.keep_folder_var = ctk.StringVar(value=str(Path.home() / "Documents" / "Sorted"))
+        ctk.CTkEntry(left_folders, textvariable=self.keep_folder_var, font=("Segoe UI", 17), corner_radius=10, height=40).pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
+        ctk.CTkButton(left_folders, text="浏览", command=self._browse_keep_folder, font=("Segoe UI", 15), corner_radius=10, width=70, height=40, fg_color="#FFFFFF", text_color="#0071E3", hover_color="#F0F0F2").pack(side=ctk.LEFT)
+
+        right_folders = ctk.CTkFrame(folder_row, fg_color="transparent")
+        right_folders.pack(side=ctk.RIGHT, fill=ctk.X, expand=True)
+
+        ctk.CTkLabel(right_folders, text="拟删文件夹", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", width=100).pack(side=ctk.LEFT, padx=(0, 10))
+        self.move_folder_var = ctk.StringVar(value=str(TEMP_DIR))
+        ctk.CTkEntry(right_folders, textvariable=self.move_folder_var, font=("Segoe UI", 17), corner_radius=10, height=40).pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 10))
+        ctk.CTkButton(right_folders, text="浏览", command=self._browse_move_folder, font=("Segoe UI", 15), corner_radius=10, width=70, height=40, fg_color="#FFFFFF", text_color="#0071E3", hover_color="#F0F0F2").pack(side=ctk.LEFT)
 
     def _toggle_api(self):
         self.api_visible = not self.api_visible
         self.api_entry.configure(show="" if self.api_visible else "*")
+
+    def _browse_scan_folder(self):
+        from tkinter import filedialog
+        folder = filedialog.askdirectory(initialdir=self.scan_folder_var.get())
+        if folder:
+            self.scan_folder_var.set(folder)
 
     def _browse_keep_folder(self):
         from tkinter import filedialog
@@ -237,16 +262,25 @@ class SorterApp:
         if folder:
             self.keep_folder_var.set(folder)
 
+    def _browse_move_folder(self):
+        from tkinter import filedialog
+        folder = filedialog.askdirectory(initialdir=self.move_folder_var.get())
+        if folder:
+            self.move_folder_var.set(folder)
+
     def _build_middle_section(self, parent):
         card = ctk.CTkFrame(parent, fg_color="#FFFFFF", corner_radius=14)
         card.pack(fill=ctk.X)
         inner = ctk.CTkFrame(card, fg_color="transparent")
-        inner.pack(fill=ctk.X, padx=20, pady=18)
+        inner.pack(fill=ctk.X, padx=20, pady=10)
+
+        file_info_frame = ctk.CTkFrame(inner, fg_color="transparent")
+        file_info_frame.pack(fill=ctk.X)
 
         self.file_name_var = ctk.StringVar(value="等待扫描...")
         self.file_meta_var = ctk.StringVar(value="")
-        ctk.CTkLabel(inner, textvariable=self.file_name_var, font=("Segoe UI", 21, "bold"), text_color="#1D1D1F", anchor="w").pack(fill=ctk.X)
-        ctk.CTkLabel(inner, textvariable=self.file_meta_var, font=("Segoe UI", 16), text_color="#86868B", anchor="w").pack(fill=ctk.X, pady=(6, 0))
+        ctk.CTkLabel(file_info_frame, textvariable=self.file_name_var, font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", anchor="w").pack(fill=ctk.X)
+        ctk.CTkLabel(file_info_frame, textvariable=self.file_meta_var, font=("Segoe UI", 15), text_color="#86868B", anchor="w").pack(fill=ctk.X, pady=(4, 0))
 
     def _build_left_pane(self, parent):
         card = ctk.CTkFrame(parent, fg_color="#FFFFFF", corner_radius=14)
@@ -255,7 +289,7 @@ class SorterApp:
         inner.pack(fill=ctk.BOTH, expand=True, padx=20, pady=18)
 
         ctk.CTkLabel(inner, text="AI 摘要", font=("Segoe UI", 18, "bold"), text_color="#1D1D1F", anchor="w").pack(fill=ctk.X, pady=(0, 10))
-        self.summary_text = ctk.CTkTextbox(inner, font=("Segoe UI", 18), text_color="#1D1D1F", fg_color="#FAFAFA", corner_radius=10, border_width=1, border_color="#E5E5EA")
+        self.summary_text = ctk.CTkTextbox(inner, font=("Segoe UI", 16), text_color="#1D1D1F", fg_color="#FAFAFA", corner_radius=10, border_width=1, border_color="#E5E5EA")
         self.summary_text.pack(fill=ctk.BOTH, expand=True)
         self.summary_text.configure(state=ctk.DISABLED)
 
@@ -274,7 +308,7 @@ class SorterApp:
         btn_layout.grid_columnconfigure(0, weight=1)
         btn_layout.grid_columnconfigure(1, weight=3)
 
-        self.btn_start = ctk.CTkButton(btn_layout, text="开始扫描", command=self._start_scan, font=("Segoe UI", 16, "bold"), corner_radius=10, height=96, fg_color="#0071E3", hover_color="#0077ED")
+        self.btn_start = ctk.CTkButton(btn_layout, text="开始扫描", command=self._start_scan, font=("Segoe UI", 16, "bold"), corner_radius=10, height=64, fg_color="#0071E3", hover_color="#0077ED")
         self.btn_start.grid(row=0, column=0, rowspan=2, sticky="nsew", padx=(0, 14))
 
         btn_group = ctk.CTkFrame(btn_layout, fg_color="transparent")
@@ -284,33 +318,22 @@ class SorterApp:
         btn_group.grid_columnconfigure(0, weight=1)
         btn_group.grid_columnconfigure(1, weight=1)
 
-        self.btn_keep = ctk.CTkButton(btn_group, text="保留", command=lambda: self._action("keep"), font=("Segoe UI", 16, "bold"), corner_radius=10, height=44, fg_color="#34C759", hover_color="#2DB84E", state=ctk.DISABLED)
+        self.btn_keep = ctk.CTkButton(btn_group, text="保留", command=lambda: self._action("keep"), font=("Segoe UI", 16, "bold"), corner_radius=10, height=28, fg_color="#34C759", hover_color="#2DB84E", state=ctk.DISABLED)
         self.btn_keep.grid(row=0, column=0, sticky="nsew", padx=(0, 8), pady=(0, 4))
-        self.btn_move = ctk.CTkButton(btn_group, text="拟删", command=lambda: self._action("move"), font=("Segoe UI", 16, "bold"), corner_radius=10, height=44, fg_color="#FF3B30", hover_color="#E0342B", state=ctk.DISABLED)
+        self.btn_move = ctk.CTkButton(btn_group, text="拟删", command=lambda: self._action("move"), font=("Segoe UI", 16, "bold"), corner_radius=10, height=28, fg_color="#FF3B30", hover_color="#E0342B", state=ctk.DISABLED)
         self.btn_move.grid(row=0, column=1, sticky="nsew", padx=(8, 0), pady=(0, 4))
 
-        self.btn_skip = ctk.CTkButton(btn_group, text="跳过", command=lambda: self._action("skip"), font=("Segoe UI", 16), corner_radius=10, height=44, fg_color="#F0F0F2", text_color="#1D1D1F", hover_color="#E5E5EA", state=ctk.DISABLED)
+        self.btn_skip = ctk.CTkButton(btn_group, text="跳过", command=lambda: self._action("skip"), font=("Segoe UI", 16), corner_radius=10, height=28, fg_color="#F0F0F2", text_color="#1D1D1F", hover_color="#E5E5EA", state=ctk.DISABLED)
         self.btn_skip.grid(row=1, column=0, sticky="nsew", padx=(0, 8), pady=(4, 0))
-        self.btn_quit = ctk.CTkButton(btn_group, text="退出", command=lambda: self._action("quit"), font=("Segoe UI", 16), corner_radius=10, height=44, fg_color="#F0F0F2", text_color="#86868B", hover_color="#E5E5EA", state=ctk.DISABLED)
+        self.btn_quit = ctk.CTkButton(btn_group, text="停止", command=lambda: self._action("quit"), font=("Segoe UI", 16), corner_radius=10, height=28, fg_color="#F0F0F2", text_color="#86868B", hover_color="#E5E5EA", state=ctk.DISABLED)
         self.btn_quit.grid(row=1, column=1, sticky="nsew", padx=(8, 0), pady=(4, 0))
-
-        progress_card = ctk.CTkFrame(right_split, fg_color="#FFFFFF", corner_radius=14)
-        progress_card.pack(fill=ctk.X, pady=(0, 12))
-        prog_inner = ctk.CTkFrame(progress_card, fg_color="transparent")
-        prog_inner.pack(fill=ctk.X, padx=20, pady=14)
-
-        self.progress_var = ctk.StringVar(value="就绪")
-        ctk.CTkLabel(prog_inner, textvariable=self.progress_var, font=("Segoe UI", 16), text_color="#86868B", anchor="w").pack(fill=ctk.X, pady=(0, 8))
-        self.progress_bar = ctk.CTkProgressBar(prog_inner, height=10, corner_radius=5, progress_color="#0071E3")
-        self.progress_bar.set(0)
-        self.progress_bar.pack(fill=ctk.X)
 
         log_card = ctk.CTkFrame(right_split, fg_color="#FFFFFF", corner_radius=14)
         log_card.pack(fill=ctk.BOTH, expand=True)
         log_inner = ctk.CTkFrame(log_card, fg_color="transparent")
-        log_inner.pack(fill=ctk.BOTH, expand=True, padx=20, pady=14)
+        log_inner.pack(fill=ctk.BOTH, expand=True, padx=20, pady=10)
 
-        ctk.CTkLabel(log_inner, text="日志", font=("Segoe UI", 16, "bold"), text_color="#1D1D1F", anchor="w").pack(fill=ctk.X, pady=(0, 10))
+        ctk.CTkLabel(log_inner, text="日志", font=("Segoe UI", 16, "bold"), text_color="#1D1D1F", anchor="w").pack(fill=ctk.X, pady=(0, 6))
         self.log_text = ctk.CTkTextbox(log_inner, font=("Consolas", 15), text_color="#86868B", fg_color="#FAFAFA", corner_radius=10, border_width=1, border_color="#E5E5EA")
         self.log_text.pack(fill=ctk.BOTH, expand=True)
         self.log_text.configure(state=ctk.DISABLED)
@@ -351,20 +374,19 @@ class SorterApp:
             messagebox.showerror("错误", f"初始化客户端失败: {e}", parent=self.root)
             return
 
+        scan_folder = Path(self.scan_folder_var.get())
+        self.files = [f for f in scan_folder.iterdir() if f.is_file() and f.suffix.lower() in SUPPORTED_EXTENSIONS]
         if not self.files:
-            self.files = [f for f in DOWNLOADS_DIR.iterdir() if f.is_file() and f.suffix.lower() in SUPPORTED_EXTENSIONS]
-            if not self.files:
-                from tkinter import messagebox
-                messagebox.showinfo("提示", "Downloads 文件夹中没有找到支持的文档文件", parent=self.root)
-                return
-            self.files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-            self._log(f"找到 {len(self.files)} 个文件，按修改时间倒序排列")
+            from tkinter import messagebox
+            messagebox.showinfo("提示", f"{scan_folder} 文件夹中没有找到支持的文档文件", parent=self.root)
+            return
+        self.files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        self._log(f"找到 {len(self.files)} 个文件，按修改时间倒序排列")
 
         self.current_index = 0
         self.stats = {"kept": 0, "moved": 0, "errors": 0, "skipped": 0}
         self.running = True
         self._set_buttons(running=True, processing=True)
-        self.progress_bar.set(0)
         threading.Thread(target=self._process_files, daemon=True).start()
 
     def _process_files(self):
@@ -398,10 +420,6 @@ class SorterApp:
         mtime_str = datetime.fromtimestamp(self.current_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
         self.file_name_var.set(self.current_file.name)
         self.file_meta_var.set(f"{size_kb:.1f} KB · 修改于 {mtime_str} · [{self.current_index + 1}/{len(self.files)}]")
-        progress_text = f"处理中: {self.current_index + 1} / {len(self.files)}"
-        self.progress_var.set(progress_text)
-        progress_val = self.current_index / len(self.files) if len(self.files) > 0 else 0
-        self.progress_bar.set(progress_val)
 
     def _next_file(self):
         self.current_index += 1
@@ -434,15 +452,16 @@ class SorterApp:
             self.stats["kept"] += 1
             self._log(f"-> 保留至: {dest}")
         elif action == "move":
-            TEMP_DIR.mkdir(exist_ok=True)
-            dest = TEMP_DIR / name
+            move_folder = Path(self.move_folder_var.get())
+            move_folder.mkdir(parents=True, exist_ok=True)
+            dest = move_folder / name
             counter = 1
             while dest.exists():
                 dest = TEMP_DIR / f"{self.current_file.stem}_{counter}{self.current_file.suffix}"
                 counter += 1
             shutil.move(str(self.current_file), str(dest))
             self.stats["moved"] += 1
-            self._log(f"-> 移到 temp/: {name}")
+            self._log(f"-> 移到拟删文件夹: {name}")
         elif action == "skip":
             self.stats["skipped"] += 1
             self._log(f"-> 跳过: {name}")
@@ -455,8 +474,6 @@ class SorterApp:
 
     def _finish(self):
         self._set_buttons(running=False, processing=False)
-        self.progress_var.set("完成")
-        self.progress_bar.set(1)
         report = f"\n===== 报告 =====\n保留: {self.stats['kept']}\n移到 temp/: {self.stats['moved']}\n跳过: {self.stats['skipped']}\n错误: {self.stats['errors']}\n================"
         self._log(report)
         self.file_name_var.set("处理完成")
